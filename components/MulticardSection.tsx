@@ -1,5 +1,10 @@
+"use client";
+
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import Image from "next/image";
 import type { CSSProperties } from "react";
+
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const CARDS = [
   {
@@ -22,14 +27,52 @@ const CARDS = [
   },
 ] as const;
 
+const VIEWPORT = { once: true as const, amount: 0.2 as const, margin: "0px 0px -48px 0px" as const };
+
 export function MulticardSection() {
+  const reduce = useReducedMotion();
+
+  const t = reduce ? { duration: 0 } : { duration: 0.52, ease: EASE };
+
+  const fadeUp: Variants = {
+    hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 26 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: t,
+    },
+  };
+
+  const root: Variants = {
+    hidden: {},
+    visible: {
+      transition: reduce
+        ? {}
+        : { staggerChildren: 0.11, delayChildren: 0.04 },
+    },
+  };
+
+  const cardsRow: Variants = {
+    hidden: {},
+    visible: {
+      transition: reduce ? {} : { staggerChildren: 0.12, delayChildren: 0 },
+    },
+  };
+
   return (
     <section
       className="multicard multicard__multicard theme-light section u-accent-fg--primary-browserbase-red"
       data-columns="3"
     >
-      <div className="multicard__container grid">
-        <div
+      <motion.div
+        className="multicard__container grid"
+        variants={root}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VIEWPORT}
+      >
+        <motion.div
+          variants={fadeUp}
           className="textLockUp textLockUp--center multicard__textLockUp"
           data-size-variant="heading-2"
           data-wrap-in-link="false"
@@ -42,15 +85,17 @@ export function MulticardSection() {
               <p>Distributed sensing, intelligent fusion, and a command-ready situational picture.</p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
+          variants={cardsRow}
           className="grid--3up multicard__cards multicard__cards--indexed"
           data-reveal-children=""
         >
           {CARDS.map((card) => (
-            <article
+            <motion.article
               key={card.index}
+              variants={fadeUp}
               className="multicard__card card card--default card--vertical u-link-reset"
               style={{ "--index": `'${card.index}'` } as CSSProperties}
             >
@@ -81,10 +126,10 @@ export function MulticardSection() {
                   </div>
                 </div>
               </div>
-            </article>
+            </motion.article>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
